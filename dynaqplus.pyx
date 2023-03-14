@@ -21,18 +21,22 @@ class DYNAQPlus:
         self.q_table = np.zeros((self.states_n, self.actions_n))
         self.model = {}
         self.visited_states = {}
-        self.visited_at = np.zeros(self.states_n)
+        self.visited_at = {}
 
     def start_episode(self):
         self.episode += 1
         self.step = 0
-        self.visited_at = np.zeros(self.states_n)
+        self.visited_at = {}
 
     def update(self, state, action, next_state, reward):
         self._update(state, action, next_state, reward)
-        last_visit = self.visited_at[next_state]
+        key = (state, next_state)
+        last_visit = self.visited_at.get(key)
+        if last_visit is None:
+            last_visit = 0
+        
         tau = self.step - last_visit
-        self.visited_at[next_state] = self.step
+        self.visited_at[key] = self.step
 
         reward = reward + self.kappa * np.sqrt(tau)
         self.q_table[state, action] = self.q_table[state, action] + self.alpha * (

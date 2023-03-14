@@ -7,43 +7,48 @@ import gym
 import gym_environments
 import matplotlib.pyplot as plt
 import csv
+import numpy as np
 
 if __name__ == "__main__":
     start = time.time()
     environment = "Blocks-v0"
-    episodes = 3500
+    episodes = 1000
+    alpha = 1.0
+    gamma = 0.95
+    epsilon = 0.1
+    kappa = 0.0001
 
     env1, env2 = gym.make(environment), gym.make(environment)
 
     dynagent = dynaq.DYNAQ(
-        env1.observation_space.n, env1.action_space.n, alpha=1, gamma=0.95, epsilon=0.1
+        env1.observation_space.n, env1.action_space.n, alpha=alpha, gamma=gamma, epsilon=epsilon
     )
     dynagentplus = dynaqplus.DYNAQPlus(
-        env1.observation_space.n, env1.action_space.n, alpha=1, gamma=0.95, epsilon=0.1, kappa=0.001
+        env1.observation_space.n, env1.action_space.n, alpha=alpha, gamma=gamma, epsilon=epsilon, kappa=kappa
     )
 
     # Train
-    steps_episodes, _ , _ = experiment.run(env1, dynagent, "epsilon-greedy", episodes)
+    steps_episodes, _, _ = experiment.run(
+        env1, dynagent, "epsilon-greedy", episodes)
     env1.close()
-    
-    steps_episodes_plus, _ , _ = experiment.run(env1, dynagentplus, "epsilon-greedy", episodes)
+
+    steps_episodes_plus, _, _ = experiment.run(
+        env1, dynagentplus, "epsilon-greedy", episodes)
     env2.close()
 
     # Play
-    env2 = gym.make(environment)
-    _, terminated, _ = experiment.run(env1, dynagentplus, "greedy", 2)
-    dynagentplus.render()
-    env2.close()
-    print(terminated)
-
     env1 = gym.make(environment)
     _, terminated, _ = experiment.run(env1, dynagent, "greedy", 2)
     dynagent.render()
     env1.close()
-    print(terminated)
+
+    env2 = gym.make(environment)
+    _, terminated_plus, _ = experiment.run(env1, dynagentplus, "greedy", 2)
+    dynagentplus.render()
+    env2.close()
 
     print(f'Time taken: {datetime.timedelta(seconds=time.time() - start)}')
-    
+
     with open('results.csv', 'w', newline='') as csvfile:
         writer = csv.writer(csvfile)
         writer.writerow(['agent', 'episode', 'steps'])
@@ -51,14 +56,16 @@ if __name__ == "__main__":
             writer.writerow(['dynaq', i, steps_episodes[i]])
             writer.writerow(['dynaq+', i, steps_episodes_plus[i]])
 
-
     # Plot
-    plt.plot([i for i in range(episodes)], steps_episodes, label="DYNA-Q")
-    plt.plot([i for i in range(episodes)], steps_episodes_plus, label="DYNA-QPlus")
+    x = np.array([i for i in range(episodes)])
+    # z1 = np.polyfit(x, np.array(steps_episodes), 6)
+    # z2 = np.polyfit(x, np.array(steps_episodes_plus), 6)
+    plt.plot(x, steps_episodes, label=f"DYNA-Q (Goal? {terminated})")
+    plt.plot(x, steps_episodes_plus,
+             label=f"DYNA-QPlus (Goal? {terminated_plus})")
 
     plt.xlabel("Episodes")
     plt.ylabel("Steps Per Episode")
-    plt.title("Steps Per Episode vs Episodes")
+    plt.title(f"Steps Per Episode vs Episodes\nAlpha{alpha} Epsilon{epsilon} Gamma{gamma} Kappa{kappa}")
     plt.legend()
     plt.show()
-    
