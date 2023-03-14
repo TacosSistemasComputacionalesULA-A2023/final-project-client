@@ -30,7 +30,7 @@ class DYNAQPlus:
 
     def update(self, state, action, next_state, reward):
         self._update(state, action, next_state, reward)
-        key = (state, next_state)
+        key = (state, action)
         last_visit = self.visited_at.get(key)
         if last_visit is None:
             last_visit = 0

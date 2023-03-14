@@ -9,7 +9,6 @@ def run(env, agent, selection_method, episodes):
     steps_episode = []
     terminated, truncated = False, False
     for episode in range(episodes):
-        print(f'Episode {episode+1}/{episodes}')
         observation, _ = env.reset()
         agent.start_episode()
         terminated, truncated = False, False

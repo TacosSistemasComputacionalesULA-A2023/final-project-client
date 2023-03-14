@@ -17,35 +17,36 @@ if __name__ == "__main__":
     gamma = 0.95
     epsilon = 0.1
     kappa = 0.0001
+    experiments = 10
 
-    env1, env2 = gym.make(environment), gym.make(environment)
+    steps_episodes = np.zeros(episodes)
+    steps_episodes_plus = np.zeros(episodes)
+    for i in range(experiments):
+        env1, env2 = gym.make(environment), gym.make(environment)
 
-    dynagent = dynaq.DYNAQ(
-        env1.observation_space.n, env1.action_space.n, alpha=alpha, gamma=gamma, epsilon=epsilon
-    )
-    dynagentplus = dynaqplus.DYNAQPlus(
-        env1.observation_space.n, env1.action_space.n, alpha=alpha, gamma=gamma, epsilon=epsilon, kappa=kappa
-    )
+        dynagent = dynaq.DYNAQ(
+            env1.observation_space.n, env1.action_space.n, alpha=alpha, gamma=gamma, epsilon=epsilon
+        )
+        dynagentplus = dynaqplus.DYNAQPlus(
+            env2.observation_space.n, env2.action_space.n, alpha=alpha, gamma=gamma, epsilon=epsilon, kappa=kappa
+        )
 
-    # Train
-    steps_episodes, _, _ = experiment.run(
-        env1, dynagent, "epsilon-greedy", episodes)
-    env1.close()
+        # Train
+        episodes_step, _, _ = experiment.run(
+            env1, dynagent, "epsilon-greedy", episodes)
+        env1.close()
 
-    steps_episodes_plus, _, _ = experiment.run(
-        env1, dynagentplus, "epsilon-greedy", episodes)
-    env2.close()
+        episodes_plus, _, _ = experiment.run(
+            env2, dynagentplus, "epsilon-greedy", episodes)
+        env2.close()
 
-    # Play
-    env1 = gym.make(environment)
-    _, terminated, _ = experiment.run(env1, dynagent, "greedy", 2)
-    dynagent.render()
-    env1.close()
+        steps_episodes = np.add(steps_episodes, episodes_step)
+        steps_episodes_plus = np.add(steps_episodes_plus, episodes_plus)
 
-    env2 = gym.make(environment)
-    _, terminated_plus, _ = experiment.run(env1, dynagentplus, "greedy", 2)
-    dynagentplus.render()
-    env2.close()
+        print(f'Experiment: {i}/{experiments}')
+        
+    steps_episodes /= experiments
+    steps_episodes_plus /= experiments
 
     print(f'Time taken: {datetime.timedelta(seconds=time.time() - start)}')
 
