@@ -49,12 +49,16 @@ if __name__ == "__main__":
 
     print(f'Time taken: {datetime.timedelta(seconds=time.time() - start)}')
 
-    with open('results.csv', 'w', newline='') as csvfile:
-        writer = csv.writer(csvfile)
-        writer.writerow(['agent', 'episode', 'steps'])
+    dynaqfile = open('dynaq.csv', 'w', newline='')
+    dynaqplusfile = open('dynaqplus.csv', 'w', newline='')
+    with dynaqplusfile and dynaqfile:
+        dynaqwriter = csv.writer(dynaqfile)
+        dynaqpluswriter = csv.writer(dynaqplusfile)
+        dynaqwriter.writerow(['episode', 'steps'])
+        dynaqpluswriter.writerow(['episode', 'steps'])
         for i in range(episodes):
-            writer.writerow(['dynaq', i, steps_episodes[i]])
-            writer.writerow(['dynaq+', i, steps_episodes_plus[i]])
+            dynaqwriter.writerow([i, steps_episodes[i]])
+            dynaqpluswriter.writerow([i, steps_episodes_plus[i]])
 
     # Plot
     x = np.array([i for i in range(episodes)])
@@ -66,6 +70,7 @@ if __name__ == "__main__":
 
     plt.xlabel("Episodes")
     plt.ylabel("Steps Per Episode")
-    plt.title(f"Steps Per Episode vs Episodes\nAlpha{alpha} Epsilon{epsilon} Gamma{gamma} Kappa{kappa}")
+    plt.title(
+        f"Steps Per Episode vs Episodes\nAlpha{alpha} Epsilon{epsilon} Gamma{gamma} Kappa{kappa}")
     plt.legend()
     plt.show()
