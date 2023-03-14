@@ -12,7 +12,7 @@ import numpy as np
 if __name__ == "__main__":
     start = time.time()
     environment = "Blocks-v0"
-    episodes = 1000
+    episodes = 2000
     alpha = 1.0
     gamma = 0.95
     epsilon = 0.1
@@ -62,8 +62,6 @@ if __name__ == "__main__":
 
     # Plot
     x = np.array([i for i in range(episodes)])
-    # z1 = np.polyfit(x, np.array(steps_episodes), 6)
-    # z2 = np.polyfit(x, np.array(steps_episodes_plus), 6)
     plt.plot(x, steps_episodes, label=f"DYNA-Q (Goal? {terminated})")
     plt.plot(x, steps_episodes_plus,
              label=f"DYNA-QPlus (Goal? {terminated_plus})")
