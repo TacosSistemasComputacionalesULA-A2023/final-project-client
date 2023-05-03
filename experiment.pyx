@@ -1,6 +1,4 @@
 import sys
-import gym
-import gym_environments
 import numpy as np
 import time
 import datetime
@@ -20,7 +18,8 @@ def run(env, agent, selection_method, episodes):
             observation = next_observation
             steps += 1
         steps_episode.append(steps)
-        if selection_method == "epsilon-greedy":
+
+        if selection_method == "epsilon-greedy" and not truncated:
             for _ in range(100):
                 state = np.random.choice(list(agent.visited_states.keys()))
                 action = np.random.choice(agent.visited_states[state])

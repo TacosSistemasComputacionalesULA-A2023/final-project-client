@@ -4,25 +4,29 @@ import dynaqplus
 import time
 import datetime
 import gym
-import gym_environments
+import gym_taco_environments
 import matplotlib.pyplot as plt
 import csv
 import numpy as np
 
 if __name__ == "__main__":
     start = time.time()
-    environment = "Blocks-v0"
-    episodes = 2000
+    environment = "BlockyRocks-v0"
+    episodes = 100
     alpha = 1.0
     gamma = 0.95
     epsilon = 0.1
     kappa = 0.0001
     experiments = 10
+    terminated_count = 0
+    terminated_plus_count = 0
+    truncated_count = 0
+    truncated_plus_count = 0
 
     steps_episodes = np.zeros(episodes)
     steps_episodes_plus = np.zeros(episodes)
     for i in range(experiments):
-        env1, env2 = gym.make(environment), gym.make(environment)
+        env1, env2 = gym.make(environment, render_mode='human', delay=0.0005), gym.make(environment, render_mode='human', delay=0.0005)
 
         dynagent = dynaq.DYNAQ(
             env1.observation_space.n, env1.action_space.n, alpha=alpha, gamma=gamma, epsilon=epsilon
@@ -32,13 +36,23 @@ if __name__ == "__main__":
         )
 
         # Train
-        episodes_step, _, _ = experiment.run(
+        episodes_step, terminated, truncated = experiment.run(
             env1, dynagent, "epsilon-greedy", episodes)
         env1.close()
 
-        episodes_plus, _, _ = experiment.run(
+        if terminated:
+            terminated_count += 1
+        if truncated:
+            truncated_count += 1
+
+        episodes_plus, terminated_plus, truncated_plus = experiment.run(
             env2, dynagentplus, "epsilon-greedy", episodes)
         env2.close()
+
+        if terminated_plus:
+            terminated_plus_count += 1
+        if truncated_plus:
+            truncated_plus_count += 1
 
         steps_episodes = np.add(steps_episodes, episodes_step)
         steps_episodes_plus = np.add(steps_episodes_plus, episodes_plus)
@@ -49,6 +63,7 @@ if __name__ == "__main__":
     steps_episodes_plus /= experiments
 
     print(f'Time taken: {datetime.timedelta(seconds=time.time() - start)}')
+    print(f'Succes: dynaq - {terminated_count / episodes, truncated_count / episodes}, dynaqplus - {terminated_plus_count / episodes, truncated_plus_count / episodes}')
 
     dynaqfile = open('dynaq.csv', 'w', newline='')
     dynaqplusfile = open('dynaqplus.csv', 'w', newline='')
@@ -60,16 +75,3 @@ if __name__ == "__main__":
         for i in range(episodes):
             dynaqwriter.writerow([i, steps_episodes[i]])
             dynaqpluswriter.writerow([i, steps_episodes_plus[i]])
-
-    # Plot
-    x = np.array([i for i in range(episodes)])
-    plt.plot(x, steps_episodes, label=f"DYNA-Q (Goal? {terminated})")
-    plt.plot(x, steps_episodes_plus,
-             label=f"DYNA-QPlus (Goal? {terminated_plus})")
-
-    plt.xlabel("Episodes")
-    plt.ylabel("Steps Per Episode")
-    plt.title(
-        f"Steps Per Episode vs Episodes\nAlpha{alpha} Epsilon{epsilon} Gamma{gamma} Kappa{kappa}")
-    plt.legend()
-    plt.show()
