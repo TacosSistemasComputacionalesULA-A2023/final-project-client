@@ -8,16 +8,23 @@ import gym_taco_environments
 import matplotlib.pyplot as plt
 import csv
 import numpy as np
+import sys
+
+ARGUMENT_COUNT = 3
 
 if __name__ == "__main__":
+    if len(sys.argv) != ARGUMENT_COUNT:
+        sys.exit(-1)
+    
+    environment = sys.argv[1]
+    experiments = int(sys.argv[2])
+    
     start = time.time()
-    environment = "BlockyRocks-v0"
     episodes = 100
     alpha = 1.0
     gamma = 0.95
     epsilon = 0.1
     kappa = 0.0001
-    experiments = 10
     terminated_count = 0
     terminated_plus_count = 0
     truncated_count = 0
@@ -75,3 +82,5 @@ if __name__ == "__main__":
         for i in range(episodes):
             dynaqwriter.writerow([i, steps_episodes[i]])
             dynaqpluswriter.writerow([i, steps_episodes_plus[i]])
+            
+    
