@@ -1,6 +1,6 @@
-import experiment
-import dynaq
-import dynaqplus
+from src import experiment
+from src.agents import dynaq
+from src.agents import dynaqplus
 import time
 import datetime
 import gym
@@ -14,10 +14,12 @@ ARGUMENT_COUNT = 3
 
 if __name__ == "__main__":
     if len(sys.argv) != ARGUMENT_COUNT:
+        print("invalid number of arguments", ARGUMENT_COUNT, "of", len(sys.argv))
         sys.exit(-1)
     
     environment = sys.argv[1]
     experiments = int(sys.argv[2])
+    render_mode = None
     
     start = time.time()
     episodes = 100
@@ -33,7 +35,7 @@ if __name__ == "__main__":
     steps_episodes = np.zeros(episodes)
     steps_episodes_plus = np.zeros(episodes)
     for i in range(experiments):
-        env1, env2 = gym.make(environment, render_mode='human', delay=0.0005), gym.make(environment, render_mode='human', delay=0.0005)
+        env1, env2 = gym.make(environment, render_mode=render_mode, delay=0.0005), gym.make(environment, render_mode=render_mode, delay=0.0005)
 
         dynagent = dynaq.DYNAQ(
             env1.observation_space.n, env1.action_space.n, alpha=alpha, gamma=gamma, epsilon=epsilon
@@ -83,4 +85,10 @@ if __name__ == "__main__":
             dynaqwriter.writerow([i, steps_episodes[i]])
             dynaqpluswriter.writerow([i, steps_episodes_plus[i]])
             
+    dynaq_learned = open('dynaq.json', 'w', newline='')
+    dynaq_plus_learned = open('dynaq_plus.json', 'w', newline='')
+    with dynaq_learned and dynaq_plus_learned:
+        dynaq_learned.write(dynagent.q_table.to_json())
+        dynaq_plus_learned.write(dynagentplus.q_table.to_json())
+    
     

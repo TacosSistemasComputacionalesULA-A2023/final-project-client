@@ -1,5 +1,17 @@
 import numpy as np
 
+class DYNAQ_Dumpable:
+    def __init__(self, q_table, model, visited_states):
+        self.q_table = q_table
+        self.model = model
+        self.visited_states = visited_states
+
+    def serialize(self):
+        return {
+            "q_table": self.q_table.tolist(),
+            "model": self.model,
+            "visited_states": self.visited_states
+        }
 
 class DYNAQ:
     def __init__(self, states_n, actions_n, alpha, gamma, epsilon):
@@ -68,3 +80,7 @@ class DYNAQ:
 
         elif mode == "values":
             print(f"Q-Table: {self.q_table}")
+
+    def serialize(self):
+        return DYNAQ_Dumpable(self.q_table, self.model, self.visited_states).serialize()
+        
