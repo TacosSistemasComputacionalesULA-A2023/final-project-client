@@ -19,9 +19,8 @@ if __name__ == "__main__":
     
     environment = sys.argv[1]
     episodes = int(sys.argv[2])
-    render_mode = None
-    delay = 0
-    # episodes = int(sys.argv[3])
+    render_mode = 'human'
+    delay = 0.05    # episodes = int(sys.argv[3])
     
     start = time.time()
     alpha = 1.0
