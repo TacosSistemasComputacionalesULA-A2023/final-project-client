@@ -1,19 +1,30 @@
 import numpy as np
+import json
+
+class NpEncoder(json.JSONEncoder):
+    def default(self, obj):
+        if isinstance(obj, np.integer):
+            return int(obj)
+        if isinstance(obj, np.floating):
+            return float(obj)
+        if isinstance(obj, np.ndarray):
+            return obj.tolist()
+        return super(NpEncoder, self).default(obj)
 
 class DYNAQPlus_Dumpable:
     def __init__(self, q_table, model, visited_states, visited_at):
-        self.q_table = q_table
-        self.model = model
-        self.visited_states = visited_states
-        self.visited_at = visited_at
+        self.q_table = q_table.tolist()
+        self.model = {",".join([str(k[0]), str(k[1])]): v for k, v in model.items()}
+        self.visited_states = {str(k): v for k, v in visited_states.items()}
+        self.visited_at = {",".join([str(k[0]), str(k[1])]): v for k, v in visited_at.items()}
 
     def serialize(self):
-        return {
-            "q_table": self.q_table.tolist(),
+        return json.dumps({
+            "q_table": self.q_table,
             "model": self.model,
             "visited_states": self.visited_states,
             "visited_at": self.visited_at
-        }
+        }, cls=NpEncoder)
 
 
 class DYNAQPlus:
@@ -98,3 +109,10 @@ class DYNAQPlus:
     
     def serialize(self):
         return DYNAQPlus_Dumpable(self.q_table, self.model, self.visited_states, self.visited_at).serialize()
+
+    def load(self, data):
+        data = json.loads(data)
+        self.q_table = np.array(data["q_table"])
+        self.model = {(np.int64(k.split(",")[0]), np.int64(k.split(",")[1])): v for k, v in data["model"].items()}
+        self.visited_states = {np.int64(k): v for k, v in data["visited_states"].items()}
+        self.visited_at = {(np.int64(k.split(",")[0]), np.int64(k.split(",")[1])): v for k, v in data["visited_at"].items()}
