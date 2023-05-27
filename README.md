@@ -1,6 +1,6 @@
 # Instructions
 
-Note: This repository uses Git LSF for the knowledge base of the agent. Please 
+Note: This repository uses Git LFS for the knowledge base of the agent. Please 
 keep that in mind when enabling the option. https://git-lfs.com/
 
 To execute this code first all dependencies must be installed:
